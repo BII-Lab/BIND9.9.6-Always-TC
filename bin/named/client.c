@@ -1039,11 +1039,25 @@ ns_client_send(ns_client_t *client) {
 	result = dns_message_rendersection(client->message,
 					   DNS_SECTION_ADDITIONAL,
 					   preferred_glue | render_opts);
-	if (result != ISC_R_SUCCESS && result != ISC_R_NOSPACE)
+	//add by runxia Wan
+	if (client->view != NULL && client->view->soft_truncate == ISC_TRUE) { 
+		CTRACE("add by rxWan, soft_truncate"); 
+		if (result == ISC_R_NOSPACE) {
+			client->message->flags |= DNS_MESSAGEFLAG_TC;
+			goto renderend;
+		}
+	}
+	// add done
+	if (result != ISC_R_SUCCESS)
 		goto done;
  renderend:
+ 	//add by runxia Wan
+ 	if(client->view != NULL && client->view->tcp_initial == ISC_TRUE){
+		CTRACE("add by rxWan, tcp_initial");
+		client->message->flags |= DNS_MESSAGEFLAG_TC;
+	}
+	//add done
 	result = dns_message_renderend(client->message);
-
 	if (result != ISC_R_SUCCESS)
 		goto done;
 

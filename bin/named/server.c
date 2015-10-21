@@ -3003,6 +3003,40 @@ configure_view(dns_view_t *view, cfg_obj_t *config, cfg_obj_t *vconfig,
 		view->additionalfromauth = ISC_TRUE;
 	}
 
+	//add by rxWan
+	obj = NULL;
+	result = ns_config_get(maps, "soft-truncate", &obj);
+	INSIST(result == ISC_R_SUCCESS);
+	view->soft_truncate = cfg_obj_asboolean(obj);
+	if (view->recursion &&  view->soft_truncate) {
+		cfg_obj_log(obj, ns_g_lctx, ISC_LOG_WARNING,
+			    "'soft_truncate yes' is only supported "
+			    "with 'recursion no'");
+		view->soft_truncate = ISC_FALSE;
+	}
+
+	obj = NULL;
+	result = ns_config_get(maps, "tcp-initial", &obj);
+	INSIST(result == ISC_R_SUCCESS);
+	view->tcp_initial = cfg_obj_asboolean(obj);
+	if (view->recursion &&  view->tcp_initial) {
+		cfg_obj_log(obj, ns_g_lctx, ISC_LOG_WARNING,
+			    "'tcp_initial yes' is only supported "
+			    "with 'recursion no'");
+		view->tcp_initial = ISC_FALSE;
+	}
+
+	obj = NULL;
+    	result = ns_config_get(maps, "tcp-priming", &obj);
+	INSIST(result == ISC_R_SUCCESS);
+	view->tcp_priming = cfg_obj_asboolean(obj);
+	if (!view->recursion && view->tcp_priming) {
+		cfg_obj_log(obj, ns_g_lctx, ISC_LOG_WARNING,
+				"'tcp_priming yes' is only supported "
+			    "with 'recursion yes'");
+	}
+
+	//add end
 	obj = NULL;
 	result = ns_config_get(maps, "additional-from-cache", &obj);
 	INSIST(result == ISC_R_SUCCESS);
@@ -3157,6 +3191,16 @@ configure_view(dns_view_t *view, cfg_obj_t *config, cfg_obj_t *vconfig,
 	dns_resolver_setclientsperquery(view->resolver,
 					cfg_obj_asuint32(obj),
 					max_clients_per_query);
+
+	obj = NULL;
+	result = ns_config_get(maps, "max-recursion-depth", &obj);
+	INSIST(result == ISC_R_SUCCESS);
+	dns_resolver_setmaxdepth(view->resolver, cfg_obj_asuint32(obj));
+
+	obj = NULL;
+	result = ns_config_get(maps, "max-recursion-queries", &obj);
+	INSIST(result == ISC_R_SUCCESS);
+	dns_resolver_setmaxqueries(view->resolver, cfg_obj_asuint32(obj));
 
 #ifdef ALLOW_FILTER_AAAA_ON_V4
 	obj = NULL;
