@@ -15,6 +15,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/* $Id: config.c,v 1.123 2012/01/06 23:46:41 tbox Exp $ */
+
 /*! \file */
 
 #include <config.h>
@@ -158,8 +160,6 @@ options {\n\
 	dnssec-accept-expired no;\n\
 	clients-per-query 10;\n\
 	max-clients-per-query 100;\n\
-	max-recursion-depth 7;\n\
-	max-recursion-queries 50;\n\
 	zero-no-soa-ttl-cache no;\n\
 	nsec3-test-zone no;\n\
 	allow-new-zones no;\n\
